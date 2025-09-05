@@ -1,0 +1,111 @@
+S2
+-- 2.1
+
+DROP VIEW IF EXISTS s2_1;
+CREATE OR REPLACE VIEW s2_1 AS
+SELECT code, omschrijving
+FROM cursussen
+WHERE lengte = 4;
+
+-- 2.2
+
+DROP VIEW IF EXISTS s2_2;
+CREATE OR REPLACE VIEW s2_2 AS
+SELECT *
+FROM medewerkers
+ORDER BY functie, gbdatum;
+
+-- 2.3
+
+DROP VIEW IF EXISTS s2_3;
+CREATE OR REPLACE VIEW s2_3 AS
+SELECT cursus, begindatum
+FROM uitvoeringen
+WHERE locatie IN ('UTRECHT', 'MAASTRICHT');
+
+-- 2.4
+
+DROP VIEW IF EXISTS s2_4;
+CREATE OR REPLACE VIEW s2_4 AS
+SELECT naam, voorl
+FROM medewerkers
+WHERE NOT (naam = 'JANSEN' AND voorl = 'R');
+
+-- 2.5
+
+INSERT INTO uitvoeringen (cursus, begindatum, docent, locatie)
+VALUES ('S02', '2025-03-02', 7369, 'LEERDAM');
+
+
+-- 2.6
+
+INSERT INTO medewerkers (mnr, naam, voorl, functie, gbdatum,
+maandsal)
+VALUES (8081, 'Paulsma', 'P', 'STAGIAIR', '2000-11-04', 1000)
+ON CONFLICT DO NOTHING;
+
+
+-- 2.7
+
+INSERT INTO schalen (snr,ondergrens, bovengrens, toelage)
+VALUES (6,3001, 4000, 500)
+ON CONFLICT DO NOTHING;
+
+
+
+
+-- 2.8
+
+INSERT INTO cursussen (code, omschrijving, type, lengte)
+VALUES ('D&P', 'Data & Persistency', 'ALG', 6)
+ON CONFLICT DO NOTHING;
+INSERT INTO uitvoeringen (cursus, begindatum, locatie, docent)
+VALUES ('D&P', '2024-01-15', 'LEERDAM', 7566),
+('D&P', '2024-02-01', 'LEERDAM', 7902),
+('D&P', '2024-04-01', 'LEERDAM', 7788)
+
+ON CONFLICT DO NOTHING;
+
+INSERT INTO inschrijvingen (cursus, cursist,begindatum,evaluatie)
+VALUES ('D&P', 7566,'2024-02-01',5), ('D&P', 7902,'2024-02-01',4), ('D&P', 7788,'2024-02-01',2)
+ON CONFLICT DO NOTHING;
+
+-- ja, ze geven zichzelf een cursus 
+-- 2.9
+
+UPDATE medewerkers
+SET maandsal = maandsal * 1.055
+WHERE functie <> 'MANAGER' AND afd = 30; -- feedback toegepast van vorige docent
+
+UPDATE medewerkers
+SET maandsal = maandsal * 1.07
+WHERE mnr IN ( -- feedback toegepast van vorige docent
+    SELECT hoofd
+    FROM afdelingen
+    WHERE anr = 30
+);
+
+-- 2.10
+
+DELETE FROM medewerkers WHERE naam = 'MARTENS';
+
+-- Alders wordt nog steeds referenced in tabel inschrijvingen ( er is geen cascade)
+DELETE FROM medewerkers WHERE naam = 'ALDERS';
+
+-- 2.11
+
+INSERT INTO afdelingen (anr, naam, locatie, hoofd)
+VALUES (50, 'FINANCIEN', 'LEERDAM', 8002)
+ON CONFLICT DO NOTHING;
+INSERT INTO medewerkers (mnr, naam, voorl, functie, chef, gbdatum,
+maandsal)
+VALUES (8782, 'Soulaiman', 'S', 'HOOFD', 7839, '2005-06-05', 5000)
+ON CONFLICT DO NOTHING;
+
+
+SELECT m.*, u.*
+FROM medewerkers m
+JOIN uitvoeringen u
+  ON m.mnr = u.docent;
+
+ 
